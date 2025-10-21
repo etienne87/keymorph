@@ -396,6 +396,7 @@ class TPS(nn.Module):
         # See make_base_grid_5d() in https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/AffineGridGenerator.cpp
         return transformed_grid.flip(-1)
 
+    @torch.compile()
     def transform_points(self, theta, ctrl, points):
         """Evaluate the thin-plate-spline (TPS) surface at xy locations arranged in a grid.
         The TPS surface is a minimum bend interpolation surface defined by a set of control points.
@@ -428,8 +429,10 @@ class TPS(nn.Module):
         P[:, :, 1:] = points[:, :, : self.dim]
 
         # U is NxHxWxT
-        b = torch.bmm(U.transpose(1, 2), weights)
-        z = torch.bmm(P.view(N, -1, self.dim + 1), affine)
+        # b = torch.bmm(U.transpose(1, 2), weights)
+        # z = torch.bmm(P.view(N, -1, self.dim + 1), affine)
+        b = torch.einsum('btp,btd->bpd', U, weights)
+        z = torch.einsum('bpd,bda->bpa', P, affine)
         return z + b
 
     def get_inverse_transformed_points(self, points):

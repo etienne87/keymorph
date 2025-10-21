@@ -28,9 +28,9 @@ class AffineTransform(nn.Module):
             self.transform_matrix = torch.inverse(inverse_matrix)
         else:
             raise ValueError("Only one of matrix or inverse_matrix should be provided")
-
     def _square(self, matrix):
-        square = torch.eye(self.dim + 1)[None]
+        batch_size = matrix.shape[0]
+        square = torch.eye(self.dim + 1).unsqueeze(0).repeat(batch_size, 1, 1)
         square[:, : self.dim, : self.dim + 1] = matrix
         return square
 
@@ -109,6 +109,5 @@ class AffineTransform(nn.Module):
         # Convert to homogeneous coordinates
         ones = torch.ones(batch_size, num_points, 1).to(points.device)
         points = torch.cat([points, ones], dim=2)
-        points = torch.bmm(transform_matrix, points.permute(0, 2, 1)).permute(0, 2, 1)
-
+        points = torch.einsum('brc,bpc->bpr', transform_matrix, points)
         return points
