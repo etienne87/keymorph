@@ -53,7 +53,7 @@ class AffineTransform(nn.Module):
 
         moving_voxel_coords = self.get_inverse_transformed_points(grid_flat)
 
-        transformed_grid = moving_voxel_coords.reshape(1, *grid_shape[2:], self.dim)
+        transformed_grid = moving_voxel_coords.reshape(-1, *grid_shape[2:], self.dim)
 
         return transformed_grid
 
