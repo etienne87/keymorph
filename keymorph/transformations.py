@@ -22,7 +22,7 @@ class AffineTransform(nn.Module):
         self.dim = dim
         if matrix is not None and inverse_matrix is None:
             self.transform_matrix = matrix
-            self.inverse_transform_matrix = torch.linalg.pinb(matrix)
+            self.inverse_transform_matrix = torch.linalg.pinv(matrix)
         elif matrix is None and inverse_matrix is not None:
             self.inverse_transform_matrix = inverse_matrix
             self.transform_matrix = torch.linalg.pinv(inverse_matrix)
